@@ -45,6 +45,7 @@
                 overflow: hidden;
                 padding-top: 56.25%; /* 16:9 Aspect Ratio */
                 width: 100%;
+                z-index: 10; /* 游戏容器层级：10（基础层级） */
             }
             .iframe-container iframe {
                 position: absolute;
@@ -53,38 +54,56 @@
                 width: 100%;
                 height: 100%;
                 border: 0;
+                z-index: 10; /* 游戏iframe层级与容器一致 */
             }
-            /* 弹幕样式：新增动态弹幕容器和动画 */
+            /* 关键优化：弹幕容器限制在非游戏区域 + 降低层级 */
             .danmaku-container {
                 position: fixed;
                 top: 0;
                 left: 0;
                 width: 100%;
+                /* 1. 排除游戏区域：游戏容器高度约56.25%（16:9），弹幕仅显示在顶部20%和底部24%区域 */
                 height: 100%;
-                pointer-events: none; /* 不遮挡页面交互 */
-                z-index: 9999; /* 确保在最上层显示 */
+                pointer-events: none; /* 不遮挡交互 */
+                z-index: 5; /* 弹幕层级：5（低于游戏的10，确保不遮挡游戏） */
+                /* 2. 通过裁剪隐藏游戏区域的弹幕 */
+                clip-path: polygon(
+                    0 0, 100% 0, /* 顶部区域 */
+                    100% 20%, 0 20%, /* 顶部20%结束 */
+                    0 76%, 100% 76%, /* 底部24%开始（100%-76%=24%） */
+                    100% 100%, 0 100% /* 底部区域 */
+                );
             }
             .danmaku {
                 position: absolute;
                 white-space: nowrap;
                 font-size: 14px;
                 font-weight: 500;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-                animation: danmaku-scroll 8s linear forwards;
+                text-shadow: 1px 1px 2px rgba(0,0,0,0.8); /* 增强文字可读性 */
+                animation: danmaku-scroll 10s linear forwards; /* 放慢速度，避免遮挡 */
+                /* 3. 限制弹幕在安全区域内 */
+                max-width: 80%; /* 避免弹幕过长 */
             }
+            /* 4. 区分顶部/底部弹幕滚动方向（优化体验） */
+            .danmaku.top { animation: danmaku-scroll 10s linear forwards; }
+            .danmaku.bottom { animation: danmaku-scroll-reverse 10s linear forwards; }
             @keyframes danmaku-scroll {
-                from { transform: translateX(100vw); } /* 从右侧进入 */
-                to { transform: translateX(-100%); } /* 从左侧离开 */
+                from { transform: translateX(100vw); } /* 顶部弹幕：从右向左 */
+                to { transform: translateX(-100%); }
+            }
+            @keyframes danmaku-scroll-reverse {
+                from { transform: translateX(-100%); } /* 底部弹幕：从左向右 */
+                to { transform: translateX(100vw); }
             }
         }
     </style>
 </head>
 <body class="bg-apple-bg text-apple-text font-sans">
-    <!-- 新增弹幕容器：用于显示动态弹幕 -->
+    <!-- 弹幕容器：仅在顶部20%和底部24%区域显示，不遮挡游戏 -->
     <div class="danmaku-container" id="danmakuContainer"></div>
 
     <!-- Header Section -->
-    <header class="relative overflow-hidden">
+    <header class="relative overflow-hidden z-index-20">
         <div class="bg-apple-dark text-white py-6 md:py-12 px-4">
             <div class="container mx-auto flex flex-col md:flex-row items-center justify-between">
                 <div class="flex items-center mb-4 md:mb-0">
@@ -125,11 +144,11 @@
             <h2 class="text-2xl md:text-3xl font-bold mb-6 pb-2 border-b border-gray-200">Play The Housefly</h2>
             
             <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-                <div class="p-4 bg-apple-dark text-white flex justify-between items-center">
+                <div class="p-4 bg-apple-dark text-white flex justify-between items-center z-index-20 relative">
                     <span><i class="fa fa-gamepad mr-2"></i>Game Play Area</span>
                     <span class="text-sm text-gray-300">Best experienced on desktop</span>
                 </div>
-                <!-- 优化后的游戏容器，使用响应式iframe容器 -->
+                <!-- 游戏容器：层级10，高于弹幕的5，确保不被遮挡 -->
                 <div class="iframe-container">
                     <iframe src="https://games.crazygames.com/en_US/the-housefly/index.html" class="game-iframe" allowfullscreen title="The Housefly Game" onload="trackBehavior('游戏iframe加载完成')"></iframe>
                 </div>
@@ -274,7 +293,7 @@
                 </div>
             </div>
 
-            <!-- 新增用户评论区：支持提交评论并显示为弹幕 -->
+            <!-- 用户评论区：位置在游戏下方，提交的评论弹幕不遮挡游戏 -->
             <div class="bg-white p-6 rounded-xl shadow-md mb-6">
                 <h3 class="text-xl font-semibold mb-4">Leave a Review</h3>
                 <div class="flex flex-col space-y-4">
@@ -407,9 +426,9 @@
         </div>
     </footer>
 
-    <!-- 核心脚本：API调用 + 用户行为捕获 + 飞书数据提交 + 动态弹幕 -->
+    <!-- 核心脚本：API调用 + 行为跟踪 + 优化后弹幕 -->
     <script>
-        // 配置：Worker主域名（避免硬编码，统一管理）
+        // 配置：Worker主域名
         const WORKER_DOMAIN = 'https://anythingyouwantconcept.online';
         // 弹幕内容池（初始默认弹幕）
         const DANMAKU_POOL = [
@@ -421,23 +440,32 @@
             "画面细节好逼真！"
         ];
 
-        // 1. 动态弹幕核心函数
+        // 1. 优化后弹幕生成函数：仅在顶部20%和底部24%区域显示
         function createDanmaku(content, isUserComment = false) {
             const container = document.getElementById('danmakuContainer');
             if (!container) return;
 
             const danmaku = document.createElement('div');
             danmaku.className = 'danmaku';
-            danmaku.textContent = content;
+            // 限制弹幕长度，避免过长遮挡
+            danmaku.textContent = content.length > 30 ? content.slice(0, 30) + '...' : content;
 
-            // 样式配置：用户评论用特殊颜色，默认弹幕随机颜色
-            const colors = isUserComment ? ['#ff3b30', '#ffcc00', '#34c759'] : ['#ffffff', '#00ffcc', '#ff99cc', '#ffff99'];
+            // 样式配置：用户评论用特殊颜色，增强区分度
+            const colors = isUserComment 
+                ? ['#ff3b30', '#ffcc00', '#34c759'] // 用户评论颜色
+                : ['#ffffff', '#00ffcc', '#ff99cc', '#ffff99']; // 默认弹幕颜色
             danmaku.style.color = colors[Math.floor(Math.random() * colors.length)];
             
-            // 随机位置（避免重叠）
-            danmaku.style.top = `${Math.random() * 80 + 10}%`; // 10%-90% 高度范围
-            danmaku.style.fontSize = isUserComment ? '16px' : '14px';
-            danmaku.style.fontWeight = isUserComment ? 'bold' : '500';
+            // 关键：随机分配到顶部或底部区域，避免游戏区域
+            const areaType = Math.random() > 0.5 ? 'top' : 'bottom';
+            danmaku.classList.add(areaType); // 添加方向类（控制滚动方向）
+            
+            // 位置计算：顶部区域（0-20%）、底部区域（76%-100%）
+            if (areaType === 'top') {
+                danmaku.style.top = `${Math.random() * 15 + 5}%`; // 顶部5%-20%（避开导航栏）
+            } else {
+                danmaku.style.top = `${Math.random() * 19 + 76}%`; // 底部76%-95%（避开评论区）
+            }
 
             // 添加到容器并执行动画
             container.appendChild(danmaku);
@@ -445,16 +473,16 @@
             // 动画结束后移除元素（避免内存占用）
             setTimeout(() => {
                 danmaku.remove();
-            }, 8000);
+            }, 10000); // 与动画时长一致（10秒）
         }
 
-        // 2. 自动生成默认弹幕（每3秒一条）
+        // 2. 自动生成默认弹幕（每4秒一条，降低频率避免密集）
         setInterval(() => {
             const randomContent = DANMAKU_POOL[Math.floor(Math.random() * DANMAKU_POOL.length)];
             createDanmaku(randomContent);
-        }, 3000);
+        }, 4000);
 
-        // 3. API调用：获取欢迎信息（修复：使用Worker主域名绝对路径）
+        // 3. API调用：获取欢迎信息（使用Worker主域名）
         async function fetchHelloAPI() {
             const statusEl = document.getElementById('api-status');
             const responseEl = document.getElementById('api-response');
@@ -463,7 +491,6 @@
             statusEl.className = 'px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800';
             
             try {
-                // 关键修复：请求Worker主域名的API，而非当前页面域名
                 const res = await fetch(`${WORKER_DOMAIN}/api/hello`);
                 if (!res.ok) throw new Error(`API错误: ${res.status}`);
                 const data = await res.json();
@@ -472,7 +499,7 @@
                 statusEl.className = 'px-3 py-1 rounded-full text-sm bg-green-100 text-green-800';
                 responseEl.textContent = JSON.stringify(data, null, 2);
                 
-                // 跟踪API请求成功行为（携带正确的API路径）
+                // 跟踪API请求成功行为
                 trackBehavior('API请求成功', { 
                     apiPath: `${WORKER_DOMAIN}/api/hello`, 
                     response: JSON.stringify(data) 
@@ -482,7 +509,7 @@
                 statusEl.className = 'px-3 py-1 rounded-full text-sm bg-red-100 text-red-800';
                 responseEl.textContent = `// 错误信息：\n${err.message}`;
                 
-                // 跟踪API请求失败行为（携带错误详情）
+                // 跟踪API请求失败行为
                 trackBehavior('API请求失败', { 
                     apiPath: `${WORKER_DOMAIN}/api/hello`, 
                     error: err.message,
@@ -491,10 +518,9 @@
             }
         }
 
-        // 4. 行为跟踪核心函数：发送数据到Worker（修复：使用绝对路径）
+        // 4. 行为跟踪核心函数：使用最新飞书Cookie（替换为你提供的新Cookie）
         async function trackBehavior(behaviorType, extraData = {}) {
             try {
-                // 构造行为数据（包含用户设备、时间等基础信息）
                 const behaviorData = {
                     behaviorType: behaviorType,
                     triggerTime: new Date().toLocaleString('zh-CN', { timeZone: 'Asia/Shanghai' }),
@@ -504,22 +530,22 @@
                     ...extraData
                 };
 
-                // 关键修复：请求Worker主域名的send-behavior接口
+                // 发送到Worker的send-behavior接口
                 const res = await fetch(`${WORKER_DOMAIN}/api/send-behavior`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(behaviorData),
-                    keepalive: true // 确保页面卸载时请求能完成（如离开页面时的行为跟踪）
+                    keepalive: true // 确保页面卸载时请求能完成
                 });
 
                 const result = await res.json();
-                console.log(`[行为跟踪] ${behaviorType}:`, result.status); // 调试用
+                console.log(`[行为跟踪] ${behaviorType}:`, result.status);
             } catch (err) {
-                console.error(`[行为跟踪失败] ${behaviorType}:`, err.message); // 仅控制台报错，不影响用户体验
+                console.error(`[行为跟踪失败] ${behaviorType}:`, err.message);
             }
         }
 
-        // 5. 用户评论提交函数（新增：提交评论并显示为弹幕）
+        // 5. 用户评论提交函数：弹幕不遮挡游戏
         async function submitUserComment() {
             const commentEl = document.getElementById('userComment');
             const content = commentEl.value.trim();
@@ -530,18 +556,18 @@
             }
 
             try {
-                // 1. 先显示为用户弹幕（即时反馈）
+                // 1. 生成用户评论弹幕（仅在顶部/底部显示）
                 createDanmaku(content, true);
                 
-                // 2. 跟踪评论行为（通过send-behavior接口）
+                // 2. 跟踪评论行为
                 await trackBehavior('用户提交评论', {
                     commentContent: content,
                     commentLength: content.length
                 });
                 
-                // 3. 清空输入框并提示成功
+                // 3. 清空输入框并提示
                 commentEl.value = '';
-                alert('评论提交成功！你的评论已显示为弹幕~');
+                alert('评论提交成功！你的评论已显示在顶部/底部弹幕区~');
             } catch (err) {
                 alert('评论提交失败，请稍后重试~');
                 console.error('评论提交失败:', err);
@@ -550,15 +576,15 @@
 
         // 6. 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', () => {
-            // 6.1 初始化API请求（获取欢迎信息）
+            // 6.1 初始化API请求
             fetchHelloAPI();
             
-            // 6.2 绑定API刷新按钮事件
+            // 6.2 绑定API刷新按钮
             document.getElementById('refresh-api')?.addEventListener('click', fetchHelloAPI);
             
-            // 6.3 绑定用户评论提交按钮事件（新增）
+            // 6.3 绑定评论提交按钮
             document.getElementById('submitComment')?.addEventListener('click', submitUserComment);
-            // 支持按Enter提交评论
+            // 支持Enter提交（Shift+Enter换行）
             document.getElementById('userComment')?.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
@@ -566,7 +592,7 @@
                 }
             });
             
-            // 6.4 绑定带data-behavior属性的元素（统一跟踪点击行为）
+            // 6.4 绑定行为跟踪元素
             document.querySelectorAll('.behavior-track').forEach(el => {
                 el.addEventListener('click', () => {
                     const behavior = el.getAttribute('data-behavior');
@@ -577,22 +603,22 @@
                 });
             });
             
-            // 6.5 跟踪页面加载完成行为
+            // 6.5 跟踪页面加载完成
             trackBehavior('页面加载完成', { 
                 referrer: document.referrer || '直接访问',
                 language: navigator.language,
                 isMobile: /Mobi|Android|iPhone/i.test(navigator.userAgent) ? '是' : '否'
             });
 
-            // 6.6 跟踪页面滚动行为（关键区域曝光）
+            // 6.6 跟踪页面滚动（防抖）
             const trackScrollSections = ['#play', '#about', '#api-data', '#reviews'];
             const trackedSections = new Set();
-            let scrollTimer; // 防抖计时器
+            let scrollTimer;
             
             window.addEventListener('scroll', () => {
                 clearTimeout(scrollTimer);
                 scrollTimer = setTimeout(() => {
-                    const scrollTop = window.scrollY + window.innerHeight * 0.8; // 可视区域80%进入即算曝光
+                    const scrollTop = window.scrollY + window.innerHeight * 0.8;
                     
                     trackScrollSections.forEach(selector => {
                         const section = document.querySelector(selector);
@@ -605,17 +631,17 @@
                             });
                         }
                     });
-                }, 300); // 300ms防抖，减少重复触发
+                }, 300);
             });
 
-            // 6.7 跟踪页面离开行为（记录停留时间）
+            // 6.7 跟踪页面离开（记录停留时间）
             const pageLoadTime = Date.now();
             window.addEventListener('beforeunload', async () => {
-                const stayTime = Math.floor((Date.now() - pageLoadTime) / 1000); // 停留时间（秒）
+                const stayTime = Math.floor((Date.now() - pageLoadTime) / 1000);
                 await trackBehavior('页面离开', {
                     stayTime: `${stayTime}秒`,
                     stayTimeMs: Date.now() - pageLoadTime,
-                    trackedSections: Array.from(trackedSections).join(',') // 记录用户浏览过的区域
+                    trackedSections: Array.from(trackedSections).join(',')
                 });
             });
         });
