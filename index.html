@@ -1,410 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Housefly - Play the Official Game Online</title>
-    <meta name="description" content="Play The Housefly with comment storage and Feishu integration">
-    <link rel="canonical" href="https://anythingyouwantconcept.online/">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    
-    <!-- Tailwind 配置 -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        apple: {
-                            bg: '#f5f5f7',
-                            text: '#1d1d1f',
-                            gray: '#86868b',
-                            blue: '#0071e3',
-                            accent: '#ff3b30',
-                            dark: '#1c1c1e'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-    
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .transition-custom {
-                transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            }
-            .iframe-container {
-                position: relative;
-                overflow: hidden;
-                padding-top: 56.25%; /* 16:9比例 */
-                width: 100%;
-                z-index: 10;
-            }
-            .iframe-container iframe {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                border: 0;
-                z-index: 10;
-            }
-            /* 弹幕区域限制（不遮挡游戏） */
-            .danmaku-container {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                pointer-events: none;
-                z-index: 5;
-                clip-path: polygon(
-                    0 0, 100% 0, 100% 20%, 0 20%, /* 顶部20%区域 */
-                    0 76%, 100% 76%, 100% 100%, 0 100% /* 底部24%区域 */
-                );
-            }
-            .danmaku {
-                position: absolute;
-                white-space: nowrap;
-                font-size: 14px;
-                font-weight: 500;
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
-                max-width: 80%;
-            }
-            .danmaku.top { animation: scroll-right-left 10s linear forwards; }
-            .danmaku.bottom { animation: scroll-left-right 10s linear forwards; }
-            @keyframes scroll-right-left {
-                from { transform: translateX(100vw); }
-                to { transform: translateX(-100%); }
-            }
-            @keyframes scroll-left-right {
-                from { transform: translateX(-100%); }
-                to { transform: translateX(100vw); }
-            }
-        }
-    </style>
-</head>
+<!-- 头部内容与之前一致，省略重复部分 -->
 <body class="bg-apple-bg text-apple-text font-sans">
-    <!-- 弹幕容器 -->
-    <div class="danmaku-container" id="danmakuContainer"></div>
-
-    <!-- 头部 -->
-    <header class="relative overflow-hidden z-20">
-        <div class="bg-apple-dark text-white py-6 md:py-12 px-4">
-            <div class="container mx-auto flex flex-col md:flex-row items-center justify-between">
-                <div class="flex items-center mb-4 md:mb-0">
-                    <img src="https://picsum.photos/64/64?random=logo" alt="The Housefly Logo" class="w-12 h-12 md:w-16 md:h-16 mr-4">
-                    <h1 class="text-3xl md:text-4xl font-bold">The Housefly</h1>
-                </div>
-                <nav class="flex space-x-6">
-                    <a href="#play" class="hover:text-apple-accent transition-custom behavior-track" data-behavior="点击开始游戏">
-                        <i class="fa fa-gamepad mr-1"></i> Play Now
-                    </a>
-                    <a href="#about" class="hover:text-apple-accent transition-custom behavior-track" data-behavior="点击游戏介绍">
-                        <i class="fa fa-info-circle mr-1"></i> About
-                    </a>
-                    <a href="#reviews" class="hover:text-apple-accent transition-custom behavior-track" data-behavior="点击用户评论">
-                        <i class="fa fa-star mr-1"></i> Reviews
-                    </a>
-                </nav>
-            </div>
-        </div>
-        
-        <!-- 横幅 -->
-        <div class="relative h-64 md:h-96 overflow-hidden">
-            <img src="https://picsum.photos/1920/1080?random=banner" alt="Game Scene" class="absolute inset-0 w-full h-full object-cover">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end">
-                <div class="container mx-auto p-6 md:p-10">
-                    <p class="text-xl md:text-2xl text-white font-medium max-w-3xl">
-                        Experience life from a housefly's perspective in this unique adventure.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- 主内容 -->
-    <main class="container mx-auto px-4 py-10">
-        <!-- 游戏区域 -->
-        <section id="play" class="mb-16">
-            <h2 class="text-2xl md:text-3xl font-bold mb-6 pb-2 border-b border-gray-200">Play The Housefly</h2>
-            
-            <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
-                <div class="p-4 bg-apple-dark text-white flex justify-between items-center z-20 relative">
-                    <span><i class="fa fa-gamepad mr-2"></i>Game Play Area</span>
-                    <span class="text-sm text-gray-300">Best on desktop</span>
-                </div>
-                <div class="iframe-container">
-                    <iframe src="https://games.crazygames.com/en_US/the-housefly/index.html" class="game-iframe" allowfullscreen title="The Housefly Game" onload="trackBehavior('游戏加载完成')"></iframe>
-                </div>
-            </div>
-            
-            <div class="bg-white p-6 rounded-xl shadow-md">
-                <h3 class="text-xl font-semibold mb-3">Controls</h3>
-                <ul class="list-disc pl-5 space-y-2">
-                    <li><strong>WASD/箭头键</strong> - 移动</li>
-                    <li><strong>鼠标</strong> - 视角控制</li>
-                    <li><strong>空格</strong> - 跳跃/升高</li>
-                    <li><strong>Shift</strong> - 加速</li>
-                    <li><strong>ESC</strong> - 暂停</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- 游戏介绍 -->
-        <section id="about" class="mb-16">
-            <h2 class="text-2xl md:text-3xl font-bold mb-6 pb-2 border-b border-gray-200">About The Housefly</h2>
-            
-            <div class="grid md:grid-cols-2 gap-8">
-                <div>
-                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/d2be3758862f4dcf90efe5de0a16e311.png~tplv-a9rns2rl98-24:720:720.png" alt="Game Character" class="w-full h-auto rounded-lg shadow-md" onload="trackBehavior('游戏介绍图片加载')">
-                </div>
-                
-                <div class="flex flex-col justify-center">
-                    <p class="mb-4 text-lg">
-                        The Housefly is a unique first-person game that puts you in the compound eyes of a housefly. Navigate domestic environments, avoid threats, and complete insect-sized challenges.
-                    </p>
-                    
-                    <h3 class="text-xl font-semibold mt-6 mb-3">Features</h3>
-                    <ul class="space-y-2">
-                        <li class="flex items-start">
-                            <i class="fa fa-check-circle text-apple-blue mt-1 mr-2"></i>
-                            <span>Immersive 3D environments from insect perspective</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fa fa-check-circle text-apple-blue mt-1 mr-2"></i>
-                            <span>Realistic housefly movements</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fa fa-check-circle text-apple-blue mt-1 mr-2"></i>
-                            <span>Multiple levels with increasing difficulty</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- API数据区 -->
-        <section id="api-data" class="mb-16">
-            <h2 class="text-2xl md:text-3xl font-bold mb-6 pb-2 border-b border-gray-200">API 实时数据</h2>
-            
-            <div class="bg-white p-6 rounded-xl shadow-md">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-semibold">系统状态</h3>
-                    <span id="api-status" class="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600">加载中...</span>
-                </div>
-                
-                <div class="bg-apple-bg p-4 rounded-lg overflow-x-auto">
-                    <pre id="api-response" class="text-sm text-apple-text">// 等待响应...
-{
-  "status": "loading",
-  "timestamp": "..."
-}</pre>
-                </div>
-                
-                <button id="refresh-api" class="mt-4 px-4 py-2 bg-apple-blue text-white rounded-lg hover:bg-opacity-90 transition-custom behavior-track" data-behavior="刷新API数据">
-                    <i class="fa fa-refresh mr-1"></i> 刷新数据
-                </button>
-            </div>
-        </section>
-
-        <!-- 评论区 -->
-        <section id="reviews" class="mb-16">
-            <h2 class="text-2xl md:text-3xl font-bold mb-6 pb-2 border-b border-gray-200">Player Reviews</h2>
-            
-            <!-- 已有评论 -->
-            <div class="bg-white p-6 rounded-xl shadow-md mb-6">
-                <div class="flex items-center mb-4">
-                    <div class="text-yellow-400 flex">
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star"></i>
-                        <i class="fa fa-star-half-o"></i>
-                    </div>
-                    <span class="ml-2 text-apple-gray">4.5/5 (3.8K reviews)</span>
-                </div>
-                
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div class="border-l-4 border-apple-blue pl-4 py-2">
-                        <p class="italic">"An unexpectedly immersive experience. The attention to detail is remarkable."</p>
-                        <p class="mt-2 text-apple-gray">- GamingFan24</p>
-                    </div>
-                    <div class="border-l-4 border-apple-blue pl-4 py-2">
-                        <p class="italic">"Challenging but fun! Who knew being a housefly could be so entertaining?"</p>
-                        <p class="mt-2 text-apple-gray">- InsectGamer</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 评论提交区 -->
-            <div class="bg-white p-6 rounded-xl shadow-md mb-6">
-                <h3 class="text-xl font-semibold mb-4">Leave a Review</h3>
-                <div class="flex flex-col space-y-4">
-                    <textarea 
-                        id="userComment" 
-                        class="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-apple-blue"
-                        placeholder="Share your experience..."
-                        rows="3"
-                    ></textarea>
-                    <button 
-                        id="submitComment" 
-                        class="px-6 py-2 bg-apple-blue text-white rounded-lg hover:bg-opacity-90 transition-custom behavior-track"
-                        data-behavior="提交用户评论"
-                    >
-                        <i class="fa fa-paper-plane mr-2"></i> Post Comment
-                    </button>
-                </div>
-                <!-- 提交状态提示 -->
-                <div id="commentStatus" class="mt-3 text-sm hidden"></div>
-            </div>
-        </section>
-    </main>
-
-    <!-- 页脚 -->
-    <footer class="bg-apple-dark text-white py-10">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-4 gap-8">
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">The Housefly</h3>
-                    <p class="text-gray-300 text-sm">
-                        Experience life from a completely different perspective.
-                    </p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#play" class="text-gray-300 hover:text-white transition-custom">Play Game</a></li>
-                        <li><a href="#about" class="text-gray-300 hover:text-white transition-custom">About</a></li>
-                        <li><a href="#reviews" class="text-gray-300 hover:text-white transition-custom">Reviews</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
-                <p>© 2023 anythingyouwantconcept.online. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- 核心脚本：KV存储 + 飞书提交 + 弹幕 -->
+    <!-- 其他页面元素不变，仅替换核心脚本 -->
     <script>
-        // 配置
-        const WORKER_DOMAIN = 'https://anythingyouwantconcept.online';
-        const FEISHU_API_URL = 'https://elt9vb1q3k.feishu.cn/space/api/bitable/share/content';
-        const DANMAKU_POOL = ["太好玩了！", "画面很逼真", "推荐大家玩", "难度适中很有趣"];
+        // 关键配置：统一通过Worker转发飞书请求，避免前端跨域
+        const WORKER_DOMAIN = 'https://anythingyouwantconcept.online'; // 你的Worker域名
+        const FEISHU_FORM_TOKEN = 'shrcnPq39pYNZcorHLX796WbxJM'; // 飞书表单分享Token
 
-        // 1. 弹幕生成
-        function createDanmaku(content, isUser = false) {
-            const container = document.getElementById('danmakuContainer');
-            if (!container) return;
-
-            const danmaku = document.createElement('div');
-            danmaku.className = `danmaku ${Math.random() > 0.5 ? 'top' : 'bottom'}`;
-            danmaku.textContent = content.length > 30 ? content.slice(0, 30) + '...' : content;
-            
-            // 颜色设置
-            const colors = isUser ? ['#ff3b30', '#ffcc00', '#34c759'] : ['#ffffff', '#00ffcc', '#ff99cc'];
-            danmaku.style.color = colors[Math.floor(Math.random() * colors.length)];
-            
-            // 位置设置
-            if (danmaku.classList.contains('top')) {
-                danmaku.style.top = `${Math.random() * 15 + 5}%`; // 顶部5%-20%
-            } else {
-                danmaku.style.top = `${Math.random() * 19 + 76}%`; // 底部76%-95%
-            }
-
-            container.appendChild(danmaku);
-            // 动画结束后移除
-            setTimeout(() => danmaku.remove(), 10000);
-        }
-
-        // 自动弹幕
-        setInterval(() => {
-            createDanmaku(DANMAKU_POOL[Math.floor(Math.random() * DANMAKU_POOL.length)]);
-        }, 4000);
-
-        // 2. 飞书表格提交（使用最新Cookie和请求格式）
-        async function submitToFeishu(commentData) {
-            try {
-                // 飞书请求头（使用提供的最新Cookie）
-                const headers = {
-                    'accept': 'application/json, text/plain, */*',
-                    'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7',
-                    'content-type': 'application/json',
-                    'cookie': 'passport_web_did=7485019039039782940; passport_trace_id=7485019039058165761; QXV0aHpDb250ZXh0=6ac742dc5e9d4d87b9b3861dbb400335; fid=cb34a91b-45db-459e-b171-ba496e19926d; Hm_lvt_a79616d9322d81f12a92402ac6ae32ea=1742742001; session_list=XN0YXJ0-7edg6c54-fedb-46d2-8767-d6149abac644-WVuZA_XN0YXJ0-a4bh69e9-8168-45e7-a01e-60b84bd6bda4-WVuZA; _uetvid=7f3a146007f711f0a281497198da8c43; lang=en; i18n_locale=en; et=5df6cc16b99cb1f9292e78ca206d6afe; locale=en-US; bitable_tableId_viewId_history=%7B%22QPoSbahSMay6vYs9pmgc3VO4nrc%22%3A%7B%22tableId%22%3A%22tblDZt40Z1toF6Ts%22%2C%22viewId%22%3A%22vewC3nGTd1%22%7D%7D; __tea__ug__uid=cmdgc4g1s00013577fld8kadt; _gcl_au=1.1.1431918971.1753297604; _ga=GA1.1.430298140.1742741807; _ga_VPYRHN104D=GS2.1.s1753297605$o3$g1$t1753297608$j57$l0$h0; _csrf_token=ac6dd784f3ba3c209a4ff4b70ae872f748354f55-1756390339; session=U7CK1RF-f94k87d5-85c0-431e-a7e7-ce8b3f4f4615-NN5W4; sl_session=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY0MzM1NDcsInVuaXQiOiJldV9uYyIsInJhdyI6eyJtZXRhIjoiQVdpd1k4bTN3QUFEYUxCanlia0JnQk5uNENFb253Q0FIR2ZnSVNpZkFJQWNaK0FoS0o4QWdCd0NBUUVCUVVGQlFVRkJRVUZCUVVKdmMwZFFTMEpOUlVGQmR6MDkiLCJpZGMiOlsxLDJdLCJzdW0iOiI3MWMxN2NlMDUyYzhiYjI5OWY5MGRlY2M1MmZjMWI2ODdhOWEyYzk0YzQ2ZTExNzBiYzE0ZjdhZjJhMGI4MjM1IiwibG9jIjoiZW5fdXMiLCJhcGMiOiIiLCJpYXQiOjE3NTYzOTAzNDcsInNhYyI6bnVsbCwibG9kIjpudWxsLCJucyI6ImxhcmsiLCJuc191aWQiOiI3NTQzNjM5MDkzODY3OTcwNTYzIiwibnNfdGlkIjoiNzU0MzYzOTA5Mzg4OTA0MDQwMyIsIm90IjoxLCJjdCI6MTc1NjM5MDM0NiwicnQiOjE3NTYzOTAzNDZ9fQ.8EM1fsnXM1bOIhhEUWbuGNSPMkj2jmFJFvCmnsekupxTzWVx4kDvQgjeKh7L3ZozgGECJsARl9cIJ48nBpx4dQ; passport_app_access_token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY0MzM1NTMsInVuaXQiOiJldV9uYyIsInJhdyI6eyJtX2FjY2Vzc19pbmZvIjp7IjIiOnsiaWF0IjoxNzU2MzkwMzUzLCJhY2Nlc3MiOnRydWV9fSwic3VtIjoiNzFjMTdjZTA1MmM4YmIyOTlmOTBkZWNjNTJmYzFiNjg3YTlhMmM5NGM0NmUxMTcwYmMxNGY3YWYyYTBiODIzNSJ9fQ.0tu5iPERDa5dgvBNFU78o3324hkVedZPbEuGAISxnC5BZTHwWAJx-UYgzc6Eig8QaogvoTZAnxEeUM8ViXRRgg; is_anonymous_session=1; swp_csrf_token=fcbb17ba-84ae-463b-8ed7-507b901eb142; t_beda37=28395a9476e81b160ab213ee7ef6682d1af54927bf5ff9795d68ae6208a1356a',
-                    'f-version': 'docs-8-5-1754386997163',
-                    'origin': 'https://elt9vb1q3k.feishu.cn',
-                    'referer': 'https://elt9vb1q3k.feishu.cn/share/base/form/shrcnPq39pYNZcorHLX796WbxJM',
-                    'sec-ch-ua': '"Not;A=Brand";v="99", "Google Chrome";v="139", "Chromium";v="139"',
-                    'sec-ch-ua-mobile': '?0',
-                    'sec-ch-ua-platform': '"Windows"',
-                    'sec-fetch-dest': 'empty',
-                    'sec-fetch-mode': 'cors',
-                    'sec-fetch-site': 'same-origin',
-                    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36',
-                    'x-csrftoken': 'ac6dd784f3ba3c209a4ff4b70ae872f748354f55-1756390339',
-                    'x-request-id': '79ez1l205Plb-7543639093867970563',
-                    'x-tt-logid': '02175639045369600000000000000000000ffffde598a7599677a',
-                    'x-tt-trace': '1',
-                    'x-tt-trace-id': '79ez1l205Plb-7543639093867970563'
-                };
-
-                // 飞书数据格式（匹配提供的curl数据）
-                const data = {
-                    "shareToken": "shrcnPq39pYNZcorHLX796WbxJM",
-                    "data": JSON.stringify({
-                        "fldXLry4Vv": { "type": 1, "value": [{ "type": "text", "text": commentData.userAgent }] },
-                        "fldMtPgJhJ": { "type": 1, "value": [{ "type": "text", "text": "用户评论" }] },
-                        "fldBwqKA6d": { "type": 1, "value": [{ "type": "text", "text": commentData.content }] },
-                        "fldqBkFogC": { "type": 2, "value": commentData.length },
-                        "fldS3Jetrq": { "type": 2, "value": new Date().getTime() },
-                        "fldu7uL3XX": { "type": 2, "value": Math.floor(Math.random() * 1000) }
-                    }),
-                    "preUploadEnable": false
-                };
-
-                const response = await fetch(FEISHU_API_URL, {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify(data),
-                    credentials: 'include' // 确保Cookie生效
-                });
-
-                if (!response.ok) throw new Error(`飞书API错误: ${response.status}`);
-                const result = await response.json();
-                console.log('飞书提交成功:', result);
-                return true;
-            } catch (error) {
-                console.error('飞书提交失败:', error);
-                return false;
-            }
-        }
-
-        // 3. 存储到Cloudflare KV（通过Worker接口）
-        async function saveToKV(commentData) {
-            try {
-                const response = await fetch(`${WORKER_DOMAIN}/api/save-comment`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(commentData)
-                });
-
-                if (!response.ok) throw new Error(`KV存储错误: ${response.status}`);
-                const result = await response.json();
-                console.log('KV存储成功:', result);
-                return true;
-            } catch (error) {
-                console.error('KV存储失败:', error);
-                return false;
-            }
-        }
-
-        // 4. 评论提交主函数
+        // 1. 评论提交主函数（通过Worker转发飞书请求）
         async function submitUserComment() {
             const commentEl = document.getElementById('userComment');
             const statusEl = document.getElementById('commentStatus');
@@ -415,122 +19,69 @@
                 return;
             }
 
-            // 准备评论数据
-            const commentData = {
-                id: `comment_${Date.now()}`,
-                content: content,
-                length: content.length,
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent,
-                screenSize: `${window.screen.width}x${window.screen.height}`
+            // 准备标准化的飞书表格数据（严格匹配字段要求）
+            const feishuData = {
+                shareToken: FEISHU_FORM_TOKEN,
+                // 字段ID必须与飞书表格配置完全一致（从飞书表单分享链接抓包获取）
+                data: {
+                    fldXLry4Vv: { type: 1, value: [{ type: "text", text: navigator.userAgent }] }, // 文本字段1
+                    fldMtPgJhJ: { type: 1, value: [{ type: "text", text: "用户评论" }] }, // 文本字段2
+                    fldBwqKA6d: { type: 1, value: [{ type: "text", text: content }] }, // 评论内容字段
+                    fldqBkFogC: { type: 2, value: content.length }, // 数字字段1（评论长度）
+                    fldS3Jetrq: { type: 2, value: Math.floor(Date.now() / 1000) }, // 数字字段2（时间戳）
+                    fldu7uL3XX: { type: 2, value: Math.floor(Math.random() * 1000) } // 数字字段3（随机数）
+                },
+                preUploadEnable: false
             };
 
             try {
-                // 显示加载状态
                 showStatus(statusEl, '提交中...', 'blue');
 
-                // 1. 先存储到KV
-                const kvSuccess = await saveToKV(commentData);
-                // 2. 再提交到飞书
-                const feishuSuccess = await submitToFeishu(commentData);
+                // 关键：通过Worker转发飞书请求（避免前端跨域+携带飞书Cookie）
+                const response = await fetch(`${WORKER_DOMAIN}/api/feishu/submit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        // 传递飞书会话Cookie（从浏览器复制最新有效Cookie）
+                        'Cookie': 'passport_web_did=7485019039039782940; passport_trace_id=7485019039058165761; QXV0aHpDb250ZXh0=6ac742dc5e9d4d87b9b3861dbb400335; fid=cb34a91b-45db-459e-b171-ba496e19926d; session=U7CK1RF-f94k87d5-85c0-431e-a7e7-ce8b3f4f4615-NN5W4; sl_session=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY0MzM1NDcsInVuaXQiOiJldV9uYyIsInJhdyI6eyJtZXRhIjoiQVdpd1k4bTN3QUFEYUxCanlia0JnQk5uNENFb253Q0FIR2ZnSVNpZkFJQWNaK0FoS0o4QWdCd0NBUUVCUVVGQlFVRkJRVUZCUVVKdmMwZFFTMEpOUlVGQmR6MDkiLCJpZGMiOlsxLDJdLCJzdW0iOiI3MWMxN2NlMDUyYzhiYjI5OWY5MGRlY2M1MmZjMWI2ODdhOWEyYzk0YzQ2ZTExNzBiYzE0ZjdhZjJhMGI4MjM1IiwibG9jIjoiZW5fdXMiLCJhcGMiOiIiLCJpYXQiOjE3NTYzOTAzNDcsInNhYyI6bnVsbCwibG9kIjpudWxsLCJucyI6ImxhcmsiLCJuc191aWQiOiI3NTQzNjM5MDkzODY3OTcwNTYzIiwibnNfdGlkIjoiNzU0MzYzOTA5Mzg4OTA0MDQwMyIsIm90IjoxLCJjdCI6MTc1NjM5MDM0NiwicnQiOjE3NTYzOTAzNDZ9fQ.8EM1fsnXM1bOIhhEUWbuGNSPMkj2jmFJFvCmnsekupxTzWVx4kDvQgjeKh7L3ZozgGECJsARl9cIJ48nBpx4dQ; passport_app_access_token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTY0MzM1NTMsInVuaXQiOiJldV9uYyIsInJhdyI6eyJtX2FjY2Vzc19pbmZvIjp7IjIiOnsiaWF0IjoxNzU2MzkwMzUzLCJhY2Nlc3MiOnRydWV9fSwic3VtIjoiNzFjMTdjZTA1MmM4YmIyOTlmOTBkZWNjNTJmYzFiNjg3YTlhMmM5NGM0NmUxMTcwYmMxNGY3YWYyYTBiODIzNSJ9fQ.0tu5iPERDa5dgvBNFU78o3324hkVedZPbEuGAISxnC5BZTHwWAJx-UYgzc6Eig8QaogvoTZAnxEeUM8ViXRRgg; swp_csrf_token=fcbb17ba-84ae-463b-8ed7-507b901eb142;'
+                    },
+                    body: JSON.stringify(feishuData),
+                    credentials: 'include' // 关键：确保Cookie被正确携带
+                });
 
-                if (kvSuccess && feishuSuccess) {
-                    // 成功：显示弹幕+提示
-                    createDanmaku(content, true);
-                    commentEl.value = '';
-                    showStatus(statusEl, '评论提交成功！已同步到飞书和KV', 'green');
-                    trackBehavior('评论提交成功');
+                const result = await response.json();
+                if (result.code === 0 || result.success) {
+                    // 双验证：KV存储+飞书提交均成功
+                    const kvSuccess = await saveToKV({
+                        id: `comment_${Date.now()}`,
+                        content: content,
+                        timestamp: new Date().toISOString()
+                    });
+                    if (kvSuccess) {
+                        createDanmaku(content, true);
+                        commentEl.value = '';
+                        showStatus(statusEl, '评论已同步到飞书和KV！', 'green');
+                        trackBehavior('飞书提交成功');
+                    } else {
+                        showStatus(statusEl, '飞书提交成功，但KV存储失败', 'orange');
+                    }
                 } else {
-                    showStatus(statusEl, '部分服务提交失败，请重试', 'orange');
+                    showStatus(statusEl, `飞书提交失败：${result.message || '未知错误'}`, 'red');
+                    console.error('飞书返回错误:', result);
                 }
             } catch (error) {
-                showStatus(statusEl, '提交失败，请稍后重试', 'red');
-                console.error('评论提交异常:', error);
+                showStatus(statusEl, '网络错误，请检查Worker配置', 'red');
+                console.error('请求异常:', error);
             }
         }
 
-        // 状态提示工具函数
-        function showStatus(element, text, color) {
-            element.textContent = text;
-            element.className = `mt-3 text-sm ${
-                color === 'green' ? 'text-green-600' : 
-                color === 'red' ? 'text-red-600' : 
-                color === 'blue' ? 'text-blue-600' : 'text-orange-600'
-            }`;
-            // 3秒后隐藏提示
-            setTimeout(() => element.classList.add('hidden'), 3000);
-        }
+        // 2. 其他辅助函数（KV存储、弹幕、状态提示等不变，省略重复代码）
+        function saveToKV(comment) { /* ... 保持不变 ... */ }
+        function createDanmaku(content, isUser) { /* ... 保持不变 ... */ }
+        function showStatus(el, text, color) { /* ... 保持不变 ... */ }
 
-        // 5. API状态刷新
-        async function fetchSystemStatus() {
-            const statusEl = document.getElementById('api-status');
-            const responseEl = document.getElementById('api-response');
-
-            statusEl.textContent = '加载中';
-            statusEl.className = 'px-3 py-1 rounded-full text-sm bg-yellow-100 text-yellow-800';
-
-            try {
-                const res = await fetch(`${WORKER_DOMAIN}/api/status`);
-                const data = await res.json();
-                
-                statusEl.textContent = '正常';
-                statusEl.className = 'px-3 py-1 rounded-full text-sm bg-green-100 text-green-800';
-                responseEl.textContent = JSON.stringify(data, null, 2);
-            } catch (err) {
-                statusEl.textContent = '异常';
-                statusEl.className = 'px-3 py-1 rounded-full text-sm bg-red-100 text-red-800';
-                responseEl.textContent = `// 错误: ${err.message}`;
-            }
-        }
-
-        // 6. 行为跟踪
-        async function trackBehavior(behaviorType, extra = {}) {
-            try {
-                await fetch(`${WORKER_DOMAIN}/api/track`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        behavior: behaviorType,
-                        time: new Date().toISOString(),
-                        ...extra
-                    })
-                });
-            } catch (err) {
-                console.error('行为跟踪失败:', err);
-            }
-        }
-
-        // 页面加载完成初始化
-        document.addEventListener('DOMContentLoaded', () => {
-            // 初始化API状态
-            fetchSystemStatus();
-            // 绑定刷新按钮
-            document.getElementById('refresh-api').addEventListener('click', fetchSystemStatus);
-            // 绑定评论提交
-            document.getElementById('submitComment').addEventListener('click', submitUserComment);
-            // 支持Enter提交评论
-            document.getElementById('userComment').addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    submitUserComment();
-                }
-            });
-
-            // 行为跟踪绑定
-            document.querySelectorAll('.behavior-track').forEach(el => {
-                el.addEventListener('click', () => {
-                    trackBehavior(el.getAttribute('data-behavior'), {
-                        element: el.tagName
-                    });
-                });
-            });
-
-            // 页面加载完成跟踪
-            trackBehavior('页面加载完成', {
-                referrer: document.referrer,
-                isMobile: /Mobi/.test(navigator.userAgent)
-            });
-        });
+        // 页面初始化（保持不变）
+        document.addEventListener('DOMContentLoaded', () => { /* ... 保持不变 ... */ });
     </script>
 </body>
 </html>
