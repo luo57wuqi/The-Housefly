@@ -162,7 +162,31 @@
                 </div>
             </div>
         </section>
-
+        <!-- API 数据展示区 -->
+        <section id="api-data" class="mb-16">
+            <h2 class="text-2xl md:text-3xl font-bold mb-6 pb-2 border-b border-gray-200">API 实时数据</h2>
+            
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold">欢迎信息接口</h3>
+                    <span id="api-status" class="px-3 py-1 rounded-full text-sm bg-gray-100 text-gray-600">加载中...</span>
+                </div>
+                
+                <!-- API 响应内容展示（格式化 JSON） -->
+                <div class="bg-apple-bg p-4 rounded-lg overflow-x-auto">
+                    <pre id="api-response" class="text-sm text-apple-text">// 等待 API 响应...
+        {
+          "message": "加载中...",
+          "timestamp": "正在获取..."
+        }</pre>
+                </div>
+                
+                <!-- 可选：添加重新加载按钮 -->
+                <button id="refresh-api" class="mt-4 px-4 py-2 bg-apple-blue text-white rounded-lg hover:bg-opacity-90 transition-custom">
+                    <i class="fa fa-refresh mr-1"></i> 重新获取数据
+                </button>
+            </div>
+        </section>
         <!-- Game Details -->
         <section class="mb-16">
             <h2 class="text-2xl md:text-3xl font-bold mb-6 pb-2 border-b border-gray-200">Game Details</h2>
